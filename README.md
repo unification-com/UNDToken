@@ -12,4 +12,6 @@ Install `truffle`:
 Download, install and run Ganache from https://truffleframework.com/ganache
 
 1. run `npm install`
+2. `cp sample.env .env`
+3. change `INITIAL_WALLET` value in `.env` to a valid wallet address
 2. run `truffle test`
