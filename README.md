@@ -1,5 +1,7 @@
 # UNDToken
-ERC20 Smart Contract for UND Tokens.
+ERC20 Smart Contract for UND Tokens, deployed at contract address `0xBE6ac6B50F577205c9D107f37b6E205aA6ACC5D4`
+
+https://etherscan.io/address/0xBE6ac6B50F577205c9D107f37b6E205aA6ACC5D4
 
 ## Unit tests
 
