@@ -61,7 +61,7 @@ async function loadData(address){
 
 async function run(){
   let supply=await loadData(contract);
-  let result = {"circSupply",supply};
+  let result = {"circSupply":supply};
   console.log("Circulating Supply: "+supply+" UND ( "+(supply/totalSupply)*100+"% )");
   let fileContents = JSON.stringify(result);
   fs.writeFile("supply.json", "Hey there!", function(err) {
