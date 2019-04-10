@@ -65,7 +65,7 @@ async function run(){
   let result = {"circSupply":supply};
   console.log("Circulating Supply: "+supply+" UND ( "+(supply/totalSupply)*100+"% )");
   let fileContents = JSON.stringify(result);
-  fs.writeFile("supply.json", "Hey there!", function(err) {
+  fs.writeFile("supply.json", fileContents, function(err) {
     if(err) {
         return console.log(err);
     }
