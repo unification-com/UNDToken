@@ -1,4 +1,5 @@
 const axios=require("axios");
+require('dotenv').config()
 
 const totalSupply = 1000000000;
 
@@ -35,7 +36,7 @@ const address_zero="0x0000000000000000000000000000000000000000";
 
 
 const apiUrlBase="https://api.etherscan.io/api?module=account&action=tokentx";
-const apiKey="YourApi";
+const apiKey=process.env.ETHERSCAN_API_KEY;
 
 let circSupply=lastSupply;
 
@@ -50,17 +51,26 @@ async function loadData(address){
   for(let i=0;i<txs.length;i++){
     let tx=txs[i];
     if(tx.tokenSymbol=="UND" && hotWallets.includes(tx.from) && !coldWallets.includes(tx.to)){
-      console.log(tx.from,"->",tx.to,":",(tx.value/1e18))
-      let txValue = tx.value/1e18;
-      circSupply+=txValue;
+    let txValue = tx.value/1e18;
+    circSupply+=txValue;
     }
   }
+  return circSupply;
 }
 
 
 async function run(){
-  await loadData(contract);
-  console.log("Circulating Supply: "+circSupply+" UND ( "+(circSupply/totalSupply)*100+"% )");
+  let supply=await loadData(contract);
+  let result = {"circSupply",circsupply};
+  console.log("Circulating Supply: "+supply+" UND ( "+(supply/totalSupply)*100+"% )");
+  let fileContents = JSON.stringify(result);
+  fs.writeFile("supply.json", "Hey there!", function(err) {
+    if(err) {
+        return console.log(err);
+    }
+
+    console.log("Circulating  supply data was saved to supply.json");
+}); 
 }
 
 run();
