@@ -1,6 +1,6 @@
+require('dotenv').config()
 const axios=require("axios");
 const fs=require("fs");
-require('dotenv').config()
 
 const totalSupply = 1000000000;
 
@@ -38,40 +38,75 @@ const address_zero="0x0000000000000000000000000000000000000000";
 
 const apiUrlBase="https://api.etherscan.io/api?module=account&action=tokentx";
 const apiKey=process.env.ETHERSCAN_API_KEY;
-
+const cmcKey=process.env.COINMARKETCAP_API_KEY;
+const priceUrlBase="https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
 let circSupply=lastSupply;
 
-async function loadData(address){
+
+async function loadPrice(address){
+
+  let url=priceUrlBase+
+    "?CMC_PRO_API_KEY="+cmcKey
+    +"&symbol=UND";
+  let response = await axios.get(url,{responseType:"json"});
+  if(response.data.status.error_code){
+    return null;
+  }
+  let price=response.data.data.UND.quote.USD.price;
+  return price;
+}
+
+async function loadSupply(address){
 
   let url=apiUrlBase+
     "&contractaddress="+address+
     "&startBlock="+lastBlockChecked+
     "&apiKey="+apiKey;
-  let response = await axios.get(url,{responseType:"json"});;
-  let txs=response.data.result;
-  for(let i=0;i<txs.length;i++){
-    let tx=txs[i];
-    if(tx.tokenSymbol=="UND" && hotWallets.includes(tx.from) && !coldWallets.includes(tx.to)){
-    let txValue = tx.value/1e18;
-    circSupply+=txValue;
+
+  try {
+    let response = await axios.get(url,{responseType:"json"});
+    let txs=response.data.result;
+    for(let i=0;i<txs.length;i++){
+      let tx=txs[i];
+      if(tx.tokenSymbol=="UND" && hotWallets.includes(tx.from) && !coldWallets.includes(tx.to)){
+      let txValue = tx.value/1e18;
+      circSupply+=txValue;
+      }
     }
+    return circSupply;
   }
-  return circSupply;
+  catch (e) {
+    console.err("Could not load supply,  error was: " +e);
+    return null;
+  }
+
 }
 
 
 async function run(){
-  let supply=await loadData(contract);
+  let supply=await loadSupply(contract);
+  if(!supply){
+    process.exit(1);
+  }
   let result = {"circSupply":supply};
   console.log("Circulating Supply: "+supply+" UND ( "+(supply/totalSupply)*100+"% )");
+  let price=await loadPrice(contract);
+  if(price){
+    marketCap=supply*price;
+    result["marketCap"]=marketCap;
+    console.log("Market Cap: "+marketCap+" USD, @ "+price+" USD per token");
+  }
+  else{
+    console.err("Unable to retrieve price data from CMC.");
+  }
   let fileContents = JSON.stringify(result);
   fs.writeFile("supply.json", fileContents, function(err) {
     if(err) {
         return console.log(err);
     }
 
-    console.log("Circulating  supply data was saved to supply.json");
-}); 
+    console.log("Data was saved to supply.json");
+});
 }
 
 run();
