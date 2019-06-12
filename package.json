@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/unification-com/UNDToken#readme",
   "dependencies": {
-    "axios": "0.18.0",
+    "axios": ">=0.18.1",
     "dotenv": "^6.2.0",
     "openzeppelin-solidity": "2.1.2",
     "truffle-hdwallet-provider": "^1.0.3"
